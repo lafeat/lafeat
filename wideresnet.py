@@ -1,4 +1,7 @@
-# WideResNet from trades
+"""
+WideResNet from TRADES
+Reference: https://github.com/yaodongyu/TRADES/blob/master/models/wideresnet.py
+"""
 import math
 import torch
 import torch.nn as nn

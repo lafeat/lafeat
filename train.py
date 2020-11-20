@@ -13,7 +13,8 @@ import torchvision
 import torchvision.transforms as transforms
 
 from utils import AverageMeter, Logger
-from frozen_wideresnet import FrozenWideResNet
+from frozen import Frozen
+from wideresnet import WideResNet
 
 
 def parse_args():
@@ -81,8 +82,8 @@ def main():
         testset, batch_size=args.test_batch, pin_memory=True,
         shuffle=False, num_workers=1)
 
-    model = FrozenWideResNet(
-        filename=args.load_name, widen_factor=10,
+    model = Frozen(
+        WideResNet, filename=args.load_name, widen_factor=10,
         num_classes=num_classes, device=device)
     if use_gpu:
         model = model.cuda()

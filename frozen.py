@@ -1,16 +1,13 @@
 import torch.nn as nn
 import torch
 
-from wideresnet import WideResNet
-
-
-class FrozenWideResNet(nn.Module):
+class Frozen(nn.Module):
     def __init__(
-            self, filename='model_cifar_wrn.pt',
+            self, model_cls, filename='model_cifar_wrn.pt',
             widen_factor=10, num_classes=10, device=None):
         super().__init__()
         # Model type specifies number of layers for CIFAR-10 model
-        model = WideResNet(num_classes=num_classes)
+        model = model_cls(num_classes=num_classes)
         pretrained_checkpoint = torch.load(filename, map_location=device)
         model.load_state_dict(pretrained_checkpoint)
         model = nn.DataParallel(model)
