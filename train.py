@@ -46,7 +46,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    sys.stdout = Logger(os.path.join(args.log_dir, '{args.load_name}.log'))
+    sys.stdout = Logger(os.path.join(args.log_dir, f'{args.save_name}.log'))
     torch.manual_seed(args.seed)
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     use_gpu = torch.cuda.is_available()
@@ -107,23 +107,22 @@ def main():
             epoch % args.eval_freq == 0 or
             (epoch + 1) == args.max_epoch)
         if dotest:
-            print("==> Test")  # Tests after every eval_freq epochs
             accs, total = test(model, testloader, use_gpu)
-            accs = '\t'.join(
+            accs = ', '.join(
                 f'Acc256_{i + 15}: {a:.2%}' for i, a in enumerate(accs))
-            print(f'{accs}\tTotal: {total}')
-            if epoch + 1 == args.max_epoch:
-                checkpoint = {
-                    'epoch': epoch + 1,
-                    'state_dict': model.state_dict(),
-                    'optimizer_model': optimizer.state_dict(),
-                }
-                path = os.path.join(
-                    args.save_dir, f'{args.save_name}_{epoch}.pth.tar')
-                torch.save(checkpoint, path)
+            print(f'{accs}, Total: {total}')
+    # save model
+    checkpoint = {
+        'epoch': args.max_epoch,
+        'state_dict': model.state_dict(),
+        'optimizer_model': optimizer.state_dict(),
+    }
+    path = os.path.join(
+        args.save_dir, f'{args.save_name}_{args.max_epoch}.pth.tar')
+    torch.save(checkpoint, path)
     elapsed = round(time.time() - start_time)
-    elapsed = str(datetime.timedelta(seconds=elapsed))
-    print('Finished. Total elapsed time (h:m:s): {}'.format(elapsed))
+    elapsed = datetime.timedelta(seconds=elapsed)
+    print(f'Finished. Total elapsed time (h:m:s): {elapsed}')
 
 
 def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_freq):
@@ -158,7 +157,7 @@ def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_fre
 
 def test(model, testloader, use_gpu):
     model.eval()
-    total = 0, 0
+    total = 0
     corrects = np.zeros(5)
     with torch.no_grad():
         for data, labels in testloader:
@@ -166,10 +165,10 @@ def test(model, testloader, use_gpu):
                 data = data.cuda()
             outputs = model(data)[-5:]
             predictions = np.array(
-                [o.max(1)[1].detach().numpy() for o in outputs])
+                [o.max(1)[1].cpu().numpy() for o in outputs])
             labels = labels.reshape(1, -1).detach().numpy()
             corrects += (predictions == labels).sum(1)
-            total += labels.size(0)
+            total += labels.size
     accs = corrects / total
     return accs, total
 
