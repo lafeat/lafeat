@@ -2,19 +2,13 @@ import torch.nn as nn
 import torch
 
 class Frozen(nn.Module):
-    def __init__(
-            self, model_cls, filename='model_cifar_wrn.pt',
-            widen_factor=10, num_classes=10, device=None):
+    def __init__(self, model_cls, widen_factor=10, num_classes=10):
         super().__init__()
         # Model type specifies number of layers for CIFAR-10 model
         model = model_cls(num_classes=num_classes)
-        pretrained_checkpoint = torch.load(filename, map_location=device)
-        model.load_state_dict(pretrained_checkpoint)
-        model = nn.DataParallel(model)
-
-        self.frozen_model = model
         for p in model.parameters():
             p.requires_grad = False
+        self.frozen_model = nn.DataParallel(model)
 
         self.avgpool = nn.AvgPool2d(8)
 
@@ -27,6 +21,16 @@ class Frozen(nn.Module):
         self.fcf256_16 = nn.Linear(64 * widen_factor, num_classes)
         self.fcf256_17 = nn.Linear(64 * widen_factor, num_classes)
         self.fcf256_18 = nn.Linear(64 * widen_factor, num_classes)
+
+    def load_frozen(self, filename, device=None):
+        state = torch.load(filename, map_location=device)
+        self.frozen_model.module.load_state_dict(state)
+
+    def state_dict(self, *args, **kwargs):
+        state = super().state_dict(*args, **kwargs)
+        return {
+            k: v for k, v in state.items()
+            if not k.startswith('frozen_model.')}
 
     def forward(self, x):
         self.frozen_model.eval()  # frozen model in eval mode

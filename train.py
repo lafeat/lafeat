@@ -4,6 +4,7 @@ import sys
 import argparse
 import datetime
 import time
+import ipdb
 
 import numpy as np
 import torch
@@ -35,6 +36,7 @@ def parse_args():
     parser.add_argument('--print-freq', type=int, default=50)
     parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--seed', type=int, default=1)
+    parser.add_argument('--data-dir', type=str, default='../datasets/cifar10')
     parser.add_argument('--log-dir', type=str, default='log')
     parser.add_argument('--load-name', type=str, default='model_cifar_wrn.pt')
     parser.add_argument('--save-dir', type=str, default='models')
@@ -68,7 +70,7 @@ def main():
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor()])
     trainset = torchvision.datasets.CIFAR10(
-        root='../datasets/cifar10',
+        root=args.data_dir,
         train=True, download=True, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=args.train_batch, pin_memory=True,
@@ -76,15 +78,14 @@ def main():
 
     transform_test = transforms.Compose([transforms.ToTensor()])
     testset = torchvision.datasets.CIFAR10(
-        root='../datasets/cifar10', train=False,
-        download=True, transform=transform_test)
+        root=args.data_dir,
+        train=False, download=True, transform=transform_test)
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=args.test_batch, pin_memory=True,
         shuffle=False, num_workers=1)
 
-    model = Frozen(
-        WideResNet, filename=args.load_name, widen_factor=10,
-        num_classes=num_classes, device=device)
+    model = Frozen(WideResNet, widen_factor=10, num_classes=num_classes)
+    model.load_frozen(args.load_name, device)
     if use_gpu:
         model = model.cuda()
 
@@ -118,7 +119,7 @@ def main():
         'optimizer_model': optimizer.state_dict(),
     }
     path = os.path.join(
-        args.save_dir, f'{args.save_name}_{args.max_epoch}.pth.tar')
+        args.save_dir, f'{args.save_name}_{args.max_epoch}.pt')
     torch.save(checkpoint, path)
     elapsed = round(time.time() - start_time)
     elapsed = datetime.timedelta(seconds=elapsed)
