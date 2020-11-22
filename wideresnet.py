@@ -61,8 +61,11 @@ class NetworkBlock(nn.Module):
 
 
 class WideResNet(nn.Module):
-    def __init__(self, depth=34, num_classes=10, widen_factor=10, dropRate=0.0):
-        super(WideResNet, self).__init__()
+    def __init__(
+            self, depth=34, num_classes=10, widen_factor=10, dropRate=0.0,
+            latent=False):
+        super().__init__()
+        self.latent = latent
         nChannels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
         if (depth - 4) % 6:
             raise ValueError('Incorrect depth.')
@@ -113,5 +116,7 @@ class WideResNet(nn.Module):
         out = F.avg_pool2d(out, 8)
         pooled = out.view(-1, self.nChannels)
         output = self.fc(pooled)
-        features += [pooled, output]
-        return features
+        if self.latent:
+            features += [pooled, output]
+            return features
+        return output

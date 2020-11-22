@@ -5,7 +5,7 @@ class Frozen(nn.Module):
     def __init__(self, model_cls, widen_factor=10, num_classes=10):
         super().__init__()
         # Model type specifies number of layers for CIFAR-10 model
-        model = model_cls(num_classes=num_classes)
+        model = model_cls(num_classes=num_classes, latent=True)
         for p in model.parameters():
             p.requires_grad = False
         self.frozen_model = nn.DataParallel(model)
