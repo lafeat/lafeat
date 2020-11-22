@@ -1,10 +1,15 @@
 # LAFEAT attack
+
 ## Introduction
 Because we take reproducibility very seriously,
 along with the submitted paper,
 we include in the supplementary materials
 the source code for running the LAFEAT attack
 on [TRADES](https://github.com/yaodongyu/TRADES).
+Note that for reproducibility,
+the scripts are made to be completely deterministic,
+your runs should *hopefully* produce
+exactly the same results as ours.
 
 ## Requirements
 
@@ -24,7 +29,9 @@ on [TRADES](https://github.com/yaodongyu/TRADES).
    python3 train.py --max-epoch=100
    ```
    It will run for 100 epochs
-   and save the final model at `models/trades.pt`.
+   and save the final logits model at `models/trades.pt`.
+   We have also included trained logits with the code,
+   so you can skip this step.
 
 3. To attack the TRADES model with trained intermediate logits, run:
    ```sh
