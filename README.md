@@ -35,7 +35,7 @@ exactly the same results as ours.
 
 3. To attack the TRADES model with trained intermediate logits, run:
    ```sh
-   python3 attack.py --multi-targeted
+   python3 attack.py --multi-targeted --num-iterations=1000
    ```
    It will run a multi-targeted LAFEAT attack
    and save the adversarial images at `attacks/lafeat.pt`.
@@ -57,7 +57,7 @@ exactly the same results as ours.
    with a **52.94%** accuracy for the CIFAR-10 test set,
    which tops the current [TRADES CIFAR-10 white-box leaderboard](https://github.com/yaodongyu/TRADES#white-box-leaderboard).
    Please download it from:
-    * [cifar10_X_adv.npy]().
+    * [cifar10_X_adv.npy](https://uc4643dc196884d1ab5fc5b4288d.dl.dropboxusercontent.com/cd/0/get/BDrjgs0il1zm2Ok6l-dkIRO30EiyfCbbMt7CQ817rn8sOHxRJODjJCHf5wGwfxvnxAorRkuCPgplXLnZytdbgTScZAi54UJwoPofPu96Ye4swHLXIxRn_Ty-R9n_F3WQIZI/file?_download_id=6965836786716988875740979343392151144010951457427632118466443275&_notify_domain=www.dropbox.com&dl=1).
 
 5. Download the CIFAR-10 datasets
    for TRADES’s testing script:
