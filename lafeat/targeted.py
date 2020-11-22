@@ -1,3 +1,9 @@
+"""
+Targeted LAFEAT Attack.
+
+Reference:
+    https://github.com/fra31/auto-attack/blob/master/autoattack/autopgd_pt.py
+"""
 import time
 
 import numpy as np

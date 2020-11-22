@@ -20,6 +20,11 @@ from wideresnet import WideResNet
 
 def parse_args():
     parser = argparse.ArgumentParser("Softmax Training for CIFAR-10 Dataset")
+    parser.add_argument('--data-dir', type=str, default='../datasets/cifar10')
+    parser.add_argument('--log-dir', type=str, default='logs')
+    parser.add_argument('--load-name', type=str, default='models/model_cifar_wrn.pt')
+    parser.add_argument('--save-dir', type=str, default='models')
+    parser.add_argument('--save-name', type=str, default='trades')
     parser.add_argument(
         '-j', '--workers', default=4, type=int,
         help="number of data loading workers (default: 4)")
@@ -36,11 +41,6 @@ def parse_args():
     parser.add_argument('--print-freq', type=int, default=50)
     parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--seed', type=int, default=1)
-    parser.add_argument('--data-dir', type=str, default='../datasets/cifar10')
-    parser.add_argument('--log-dir', type=str, default='log')
-    parser.add_argument('--load-name', type=str, default='model_cifar_wrn.pt')
-    parser.add_argument('--save-dir', type=str, default='models')
-    parser.add_argument('--save-name', type=str, default='trades')
     parser.add_argument(
         '--weight-decay', type=float, default=0.0)
     return parser.parse_args()
@@ -109,17 +109,16 @@ def main():
             (epoch + 1) == args.max_epoch)
         if dotest:
             accs, total = test(model, testloader, use_gpu)
-            accs = ', '.join(
-                f'Acc256_{i + 15}: {a:.2%}' for i, a in enumerate(accs))
-            print(f'{accs}, Total: {total}')
+            desc = ', '.join(
+                f'Acc256_{i + 15}: {a:.2%}' for i, a in enumerate(accs[:-1]))
+            print(f'{desc}, Acc_outputs: {accs[-1]:.2%}, Total: {total}')
     # save model
     checkpoint = {
         'epoch': args.max_epoch,
         'state_dict': model.state_dict(),
         'optimizer_model': optimizer.state_dict(),
     }
-    path = os.path.join(
-        args.save_dir, f'{args.save_name}_{args.max_epoch}.pt')
+    path = os.path.join(args.save_dir, f'{args.save_name}.pt')
     torch.save(checkpoint, path)
     elapsed = round(time.time() - start_time)
     elapsed = datetime.timedelta(seconds=elapsed)
