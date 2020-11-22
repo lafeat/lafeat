@@ -33,7 +33,7 @@ def convert(args):
     x = np.float32(np.load(args.data))
     e = epsilon(args.epsilon)
     load_path = os.path.join(args.save_dir, args.name)
-    xadv = torch.load(load_path)['adv_complete']
+    xadv = torch.load(load_path)['adversarial_images']
     xadv = permute(xadv)
     # d = torch.clamp(xadv - x, -e, e)
     # xadv = torch.clamp(d + x, 0.0, 1.0)

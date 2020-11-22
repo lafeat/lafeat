@@ -4,7 +4,6 @@ import sys
 import argparse
 import datetime
 import time
-import ipdb
 
 import numpy as np
 import torch
@@ -14,6 +13,7 @@ import torchvision
 import torchvision.transforms as transforms
 
 from utils import AverageMeter, Logger
+from autoaug import CIFAR10Policy
 from frozen import Frozen
 from wideresnet import WideResNet
 
@@ -22,9 +22,9 @@ def parse_args():
     parser = argparse.ArgumentParser("Softmax Training for CIFAR-10 Dataset")
     parser.add_argument('--data-dir', type=str, default='../datasets/cifar10')
     parser.add_argument('--log-dir', type=str, default='logs')
-    parser.add_argument('--load-name', type=str, default='models/model_cifar_wrn.pt')
-    parser.add_argument('--save-dir', type=str, default='models')
-    parser.add_argument('--save-name', type=str, default='trades')
+    parser.add_argument('--model-dir', type=str, default='models')
+    parser.add_argument('--load-model', type=str, default='model_cifar_wrn.pt')
+    parser.add_argument('--save-model', type=str, default='trades')
     parser.add_argument(
         '-j', '--workers', default=4, type=int,
         help="number of data loading workers (default: 4)")
@@ -48,7 +48,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    sys.stdout = Logger(os.path.join(args.log_dir, f'{args.save_name}.log'))
+    sys.stdout = Logger(os.path.join(args.log_dir, f'{args.save_model}.log'))
     torch.manual_seed(args.seed)
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     use_gpu = torch.cuda.is_available()
@@ -61,13 +61,14 @@ def main():
     else:
         print('Using CPU')
 
-    os.makedirs(f'./{args.save_dir}', exist_ok=True)
+    os.makedirs(f'./{args.model_dir}', exist_ok=True)
     # Data Loading
     num_classes = 10
     print('==> Preparing dataset ')
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
+        CIFAR10Policy(),
         transforms.ToTensor()])
     trainset = torchvision.datasets.CIFAR10(
         root=args.data_dir,
@@ -85,7 +86,8 @@ def main():
         shuffle=False, num_workers=1)
 
     model = Frozen(WideResNet, widen_factor=10, num_classes=num_classes)
-    model.load_frozen(args.load_name, device)
+    model_path = os.path.join(args.model_dir, args.load_model)
+    model.load_frozen(model_path, device)
     if use_gpu:
         model = model.cuda()
 
@@ -118,7 +120,7 @@ def main():
         'state_dict': model.state_dict(),
         'optimizer_model': optimizer.state_dict(),
     }
-    path = os.path.join(args.save_dir, f'{args.save_name}.pt')
+    path = os.path.join(args.model_dir, f'{args.save_model}.pt')
     torch.save(checkpoint, path)
     elapsed = round(time.time() - start_time)
     elapsed = datetime.timedelta(seconds=elapsed)
