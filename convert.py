@@ -49,9 +49,9 @@ def convert(args):
 def verbose(eps, xadv, x):
     d = xadv - x
     oe = np.float64(eps)
-    print(
-        f'{d.min()}, {d.max()}, '
-        f'True: {d.min() >= -oe}, True: {d.max() <= oe}.')
+    print(f'Min: {d.min()}. max: {d.max()}; ')
+    print(f'Is min bound ok? {d.min() >= -oe}. ')
+    print(f'Is max bound ok? {d.max() <= oe}.')
 
 
 if __name__ == '__main__':
