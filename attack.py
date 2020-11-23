@@ -10,6 +10,7 @@ from utils import Logger
 from frozen import Frozen
 from wideresnet import WideResNet
 from lafeat.eval import LafeatEval
+from train import test
 
 
 def parse_args():
@@ -47,7 +48,7 @@ def main(args):
     device = torch.device('cuda')
     model = Frozen(WideResNet)
     state = torch.load(args.logits_model, map_location=device)
-    model.load_state_dict(state, strict=False)
+    model.load_state_dict(state['state_dict'], strict=False)
     model.load_frozen(args.frozen_model)
     model = model.cuda()
     model.eval()
@@ -57,6 +58,10 @@ def main(args):
         root=args.data_dir, train=False, transform=transform, download=True)
     test_loader = data.DataLoader(
         item, batch_size=1000, shuffle=False, num_workers=0)
+
+    accs, _ = test(model, test_loader, True)
+    accs = ', '.join(f'{a:.2%}' for a in accs)
+    print(f'Accuracies: {accs}')
 
     xtest, ytest = [torch.cat(xy, 0) for xy in zip(*test_loader)]
     n = args.num_examples
