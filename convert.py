@@ -29,21 +29,15 @@ def epsilon(s):
     return e - 4 * e * np.finfo(e).eps
 
 
-def convert(args):
-    x = np.float32(np.load(args.data))
-    e = epsilon(args.epsilon)
-    load_path = os.path.join(args.save_dir, args.name)
-    xadv = torch.load(load_path)['adversarial_images']
+def convert(x, xadv, eps):
+    e = epsilon(eps)
     xadv = permute(xadv)
     # d = torch.clamp(xadv - x, -e, e)
     # xadv = torch.clamp(d + x, 0.0, 1.0)
     xadv = xadv.numpy()
     # xadv = np.clip(xadv, x - e, x + e)
     d = np.clip(xadv - x, -e, e)
-    xadv = np.clip(d + x, 0.0, 1.0)
-    save_path = os.path.join(args.save_dir, 'cifar10_X_adv.npy')
-    np.save(save_path, xadv)
-    verbose(args.epsilon, xadv, x)
+    return np.clip(d + x, 0.0, 1.0)
 
 
 def verbose(eps, xadv, x):
@@ -54,5 +48,16 @@ def verbose(eps, xadv, x):
     print(f'Is max bound ok? {d.max() <= oe}.')
 
 
+def main(args):
+    x = np.float32(np.load(args.data))
+    load_path = os.path.join(args.save_dir, args.name)
+    xadv = torch.load(load_path)['adversarial_images']
+    xadv = convert(x, xadv, args.epsilon)
+    save_path = os.path.join(args.save_dir, 'cifar10_X_adv.npy')
+    np.save(save_path, xadv)
+    print(f'Saved converted images at {save_path}.')
+    verbose(args.epsilon, xadv, x)
+
+
 if __name__ == '__main__':
-    convert(parse_args())
+    main(parse_args())
