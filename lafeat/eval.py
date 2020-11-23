@@ -39,6 +39,7 @@ class LafeatEval():
     def _betas(self, beta):
         # beta schedule
         betas = np.arange(*beta).tolist()
+        return betas
         m = len(betas) // 2
         b1, b2 = reversed(betas[:m]), betas[m:]
         return [

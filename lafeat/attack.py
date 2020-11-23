@@ -32,18 +32,18 @@ class LafeatAttack():
     def check_shape(self, x):
         return x if len(x.shape) > 0 else np.expand_dims(x, 0)
 
-    def check_right_index(self, output, labels):
-        output_index = output.argmax(dim=-1) == labels
-        mask = output_index.to(dtype=torch.int8)
-        mask = torch.unsqueeze(mask, -1)
-        return mask
-
     def dlr_loss(self, x, y):
         x_sorted, ind_sorted = x.sort(dim=1)
         ind = (ind_sorted[:, -1] == y).float()
 
         return -(x[np.arange(x.shape[0]), y] - x_sorted[:, -2] * ind - x_sorted[:, -1] * (1. - ind)) / (
                 x_sorted[:, -1] - x_sorted[:, -3] + 1e-12)
+
+    def check_right_index(self, output, labels):
+        output_index = output.argmax(dim=-1) == labels
+        mask = output_index.to(dtype=torch.int8)
+        mask = torch.unsqueeze(mask, -1)
+        return mask
 
     def get_output_scale(self, output):
         std_max_out = []
@@ -187,7 +187,8 @@ class LafeatAttack():
             pred = logits.detach().max(1)[1] == y
             acc = torch.min(acc, pred)
             acc_steps[i + 1] = acc + 0
-            x_best_adv[(pred == 0).nonzero().squeeze()] = x_adv[(pred == 0).nonzero().squeeze()] + 0.
+            best_idx = (pred == 0).nonzero(as_tuple=False).squeeze()
+            x_best_adv[best_idx] = x_adv[best_idx]
             if self.verbose:
                 print('iteration: {} - Best loss: {:.6f}'.format(i, loss_best.sum()))
 
@@ -203,7 +204,6 @@ class LafeatAttack():
         adv = x.clone()
         x_input = x
         acc = self.model(x_input)[-1].max(1)[1] == y
-        loss = -1e10 * torch.ones_like(acc).float()
         if self.verbose:
             print('-------------------------- running {}-attack with epsilon {:.4f} --------------------------'.format(
                 self.norm, self.eps))
@@ -213,13 +213,13 @@ class LafeatAttack():
         torch.random.manual_seed(self.seed)
         torch.cuda.random.manual_seed(self.seed)
 
-        ind_to_fool = acc.nonzero().squeeze()
+        ind_to_fool = acc.nonzero(as_tuple=False).squeeze()
         if len(ind_to_fool.shape) == 0:
             ind_to_fool = ind_to_fool.unsqueeze(0)
         if ind_to_fool.numel() != 0:
             x_to_fool, y_to_fool = x[ind_to_fool].clone(), y[ind_to_fool].clone()
             best_curr, acc_curr, loss_curr, adv_curr = self.attack_single_run(x_to_fool, y_to_fool)
-            ind_curr = (acc_curr == 0).nonzero().squeeze()
+            ind_curr = (acc_curr == 0).nonzero(as_tuple=False).squeeze()
             #
             acc[ind_to_fool[ind_curr]] = 0
             adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
