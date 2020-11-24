@@ -7,10 +7,10 @@ import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--data', type=str, default='attacks/cifar10_X.npy')
     parser.add_argument('--save-dir', type=str, default='attacks')
+    parser.add_argument('--data', type=str, default='cifar10_X.npy')
     parser.add_argument('--name', type=str, default='lafeat.pt')
+    parser.add_argument('--save-name', type=str, default='cifar10_X_adv.npy')
     parser.add_argument('--epsilon', type=str, default='0.031')
     return parser.parse_args()
 
@@ -49,11 +49,12 @@ def verbose(eps, xadv, x):
 
 
 def main(args):
-    x = np.float32(np.load(args.data))
-    load_path = os.path.join(args.save_dir, args.name)
-    xadv = torch.load(load_path)['adversarial_images']
+    x_path = os.path.join(args.save_dir, args.data)
+    x = np.float32(np.load(x_path))
+    xadv_path = os.path.join(args.save_dir, args.name)
+    xadv = torch.load(xadv_path)['adversarial_images']
     xadv = convert(x, xadv, args.epsilon)
-    save_path = os.path.join(args.save_dir, 'cifar10_X_adv.npy')
+    save_path = os.path.join(args.save_dir, args.save_name)
     np.save(save_path, xadv)
     print(f'Saved converted images at {save_path}.')
     verbose(args.epsilon, xadv, x)
