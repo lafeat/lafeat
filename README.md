@@ -61,7 +61,7 @@ exactly the same results as ours.
    We ran multi-targeted LAFEAT with 1000 iterations,
    and generated the adversarial examples
    with a **52.94%** accuracy for the CIFAR-10 test set,
-   which tops the current
+   which places it at the top of the
    [TRADES CIFAR-10 white-box leaderboard](https://github.com/yaodongyu/TRADES#white-box-leaderboard-1).
    For convenience,
    we uploaded the file anonymously,
