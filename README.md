@@ -43,16 +43,17 @@ exactly the same results as ours.
        --logits-model=models/trades_new.pt  # your trained logits
    ```
    It will run a multi-targeted LAFEAT attack
-   and save the adversarial images at `attacks/lafeat.pt`.
+   and save the adversarial images at `attacks/lafeat.{additional_info}.pt`.
 
 4. For testing with the original TRADES
    [evaluation script](https://github.com/yaodongyu/TRADES/blob/master/evaluate_attack_cifar10.py),
    we need to first convert the adversarial examples
    for their script with the following command:
    ```sh
-   python3 convert.py
+   python3 convert.py --name=lafeat.{additional_info}.pt
    ```
-   It converts the `.pt` file to a `.npy` file
+   By default,
+   it converts the `.pt` file to a `cifar10_X_adv.npy` file
    and performs additional range clipping
    to ensure correct L-inf boundaries
    under the effect of floating-point errors.
@@ -73,7 +74,13 @@ exactly the same results as ours.
     * [`cifar10_X.npy`](https://drive.google.com/file/d/1PXePa721gTvmQ46bZogqNGkW31Vu6u3J/view?usp=sharing)
     * [`cifar10_Y.npy`](https://drive.google.com/file/d/1znICoQ8Ds9MH-1yhNssDs3hgBpvx57PV/view?usp=sharing)
 
-6. Evaluate with the original TRADES script using:
+6. Evaluate with
+   [the original TRADES script](https://github.com/yaodongyu/TRADES/blob/master/evaluate_attack_cifar10.py)
+   (with minor modifications to make it work with our paths)
+   using:
    ```sh
    python3 eval_trades.py
    ```
+   and you should be able
+   to test the accuracy of LAFEAT adversarial examples
+   on the TRADES model.

@@ -1,7 +1,9 @@
 import os
 import sys
 import argparse
+import itertools
 
+import numpy as np
 import torch
 from torch.utils import data
 from torchvision import transforms, datasets
@@ -29,7 +31,20 @@ def parse_args():
     parser.add_argument('--num-iterations', type=int, default=1)
     parser.add_argument('--multi-targeted', action='store_true')
     parser.add_argument('--beta-arange', type=float, nargs=3, default=(0, 1.0, 0.1))
+    parser.add_argument('--no-beta-schedule', action='store_true')
     return parser.parse_args()
+
+
+def betas(args):
+    # beta schedule
+    bs = np.arange(*args.beta_arange).tolist()
+    if args.no_beta_schedule:
+        return bs
+    m = len(bs) // 2
+    b1, b2 = reversed(bs[:m]), bs[m:]
+    return [
+        b for b in itertools.chain(*itertools.zip_longest(b1, b2))
+        if b is not None]
 
 
 def save(save_name, args, images, robust):
@@ -83,7 +98,7 @@ def main(args):
     adversary = LafeatEval(
         model, xtest[:n], ytest[:n],
         n_iter=args.num_iterations, norm=args.norm, eps=args.epsilon,
-        betas=args.beta_arange, target=args.multi_targeted,
+        betas=betas(args), target=args.multi_targeted,
         batch_size=args.batch_size, device=device, verbose=args.verbose)
 
     with torch.no_grad():

@@ -1,16 +1,14 @@
 import math
 import time
-import itertools
 
 import torch
-import numpy as np
 from lafeat.attack import LafeatAttack
 from lafeat.targeted import TargetedLafeatAttack
 
 
 class LafeatEval():
     def __init__(
-            self, model, x, y, n_iter, norm, eps, betas=(0, 1.0, 0.1),
+            self, model, x, y, n_iter, norm, eps, betas=(0.0, ),
             target=False, batch_size=125, device='cuda', verbose=True):
         self.model = model
         self.x = x
@@ -19,7 +17,7 @@ class LafeatEval():
         if norm not in ['Linf', 'L2']:
             raise ValueError(f'Unexpected norm {norm}.')
         self.epsilon = eps
-        self.betas = self._betas(betas)
+        self.betas = betas
         rho = 0.75
         self.attack = LafeatAttack(
             self.model, n_iter, self.norm, self.epsilon,
@@ -35,16 +33,6 @@ class LafeatEval():
         self.device = device
         self.robust = torch.ones(x.size(0), dtype=torch.bool).to(x.device)
         self.x_adv = x.clone().detach()
-
-    def _betas(self, beta):
-        # beta schedule
-        betas = np.arange(*beta).tolist()
-        return betas
-        m = len(betas) // 2
-        b1, b2 = reversed(betas[:m]), betas[m:]
-        return [
-            b for b in itertools.chain(*itertools.zip_longest(b1, b2))
-            if b is not None]
 
     def _logits(self, x):
         return self.model(x)[-1]
