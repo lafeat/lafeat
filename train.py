@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument(
         '--lr', type=float, default=0.001, help="learning rate")
     parser.add_argument('--max-epoch', type=int, default=100)
-    parser.add_argument('--eval-freq', type=int, default=10)
+    parser.add_argument('--eval-freq', type=int, default=1)
     parser.add_argument('--print-freq', type=int, default=50)
     parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--seed', type=int, default=1)
@@ -122,9 +122,10 @@ def main():
     }
     path = os.path.join(args.model_dir, f'{args.save_model}.pt')
     torch.save(checkpoint, path)
+    print(f'Saved logits model at {path}.')
     elapsed = round(time.time() - start_time)
     elapsed = datetime.timedelta(seconds=elapsed)
-    print(f'Finished. Total elapsed time (h:m:s): {elapsed}')
+    print(f'Finished. Total elapsed time (h:m:s): {elapsed}.')
 
 
 def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_freq):

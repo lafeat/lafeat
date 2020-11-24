@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument('--epsilon', type=float, default=0.031)
     parser.add_argument('--num-iterations', type=int, default=1)
     parser.add_argument('--multi-targeted', action='store_true')
-    parser.add_argument('--beta-increment', type=float, default=0.1)
+    parser.add_argument('--beta-arange', type=float, nargs=3, default=(0, 1.0, 0.1))
     return parser.parse_args()
 
 
@@ -83,7 +83,7 @@ def main(args):
     adversary = LafeatEval(
         model, xtest[:n], ytest[:n],
         n_iter=args.num_iterations, norm=args.norm, eps=args.epsilon,
-        betas=(0, 1.0, args.beta_increment), target=args.multi_targeted,
+        betas=args.beta_arange, target=args.multi_targeted,
         batch_size=args.batch_size, device=device, verbose=args.verbose)
 
     with torch.no_grad():
