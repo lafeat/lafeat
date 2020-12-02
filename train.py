@@ -151,7 +151,8 @@ def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_fre
 
         if (batch_idx + 1) % print_freq == 0:
             avgs = [
-                f'Loss256_{i + 15}: {l.avg:.3f}' for i, l in enumerate(meters[:-1])]
+                f'Loss256_{i + 15}: {l.avg:.3f}'
+                for i, l in enumerate(meters[:-1])]
             avgs = ', '.join(avgs)
             avgs += f', Loss_outputs {all_meter.avg:.3f}'
             print(f'Batch {batch_idx + 1}/{len(trainloader)}: {avgs}')
