@@ -137,8 +137,8 @@ def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_fre
         if use_gpu:
             data, labels = data.cuda(), labels.cuda()
         all_outputs = model(data)[-5:]
-
-        loss_xent = [criterion(o, labels) for o in all_outputs]
+        model_label = all_outputs[-1].argmax(dim=-1).detach()
+        loss_xent = [criterion(o, model_label) for o in all_outputs]
         all_loss_xent = sum(loss_xent[:-1])
 
         optimizer.zero_grad()
