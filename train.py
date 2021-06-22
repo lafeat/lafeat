@@ -36,8 +36,8 @@ def parse_args():
         help='test batch size')
     parser.add_argument(
         '--lr', type=float, default=0.001, help="learning rate")
-    parser.add_argument('--max-epoch', type=int, default=100)
-    parser.add_argument('--eval-freq', type=int, default=1)
+    parser.add_argument('--max-epoch', type=int, default=50)
+    parser.add_argument('--eval-freq', type=int, default=10)
     parser.add_argument('--print-freq', type=int, default=50)
     parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--seed', type=int, default=1)
@@ -151,8 +151,7 @@ def train(trainloader, model, criterion, optimizer, use_gpu, model_lr, print_fre
 
         if (batch_idx + 1) % print_freq == 0:
             avgs = [
-                f'Loss256_{i + 15}: {l.avg:.3f}'
-                for i, l in enumerate(meters[:-1])]
+                f'Loss256_{i + 15}: {l.avg:.3f}' for i, l in enumerate(meters[:-1])]
             avgs = ', '.join(avgs)
             avgs += f', Loss_outputs {all_meter.avg:.3f}'
             print(f'Batch {batch_idx + 1}/{len(trainloader)}: {avgs}')
