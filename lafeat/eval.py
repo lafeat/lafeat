@@ -2,17 +2,15 @@ import math
 import time
 
 import torch
-from lafeat.attack import LafeatAttack
-from lafeat.targeted import TargetedLafeatAttack
-import sys
-import numpy as np
-sys.path.insert(0, '..')
-from utils import Logger2
+
+from .attack import LafeatAttack
+from .targeted import TargetedLafeatAttack
+
 
 class LafeatEval():
     def __init__(
             self, model, x, y, n_iter, norm, eps, betas=(0.0, ),
-            target=False, batch_size=125, device='cuda', verbose=True, log_path=None):
+            target=False, batch_size=125, device='cuda', verbose=True):
         self.model = model
         self.x = x
         self.y = y
@@ -37,7 +35,6 @@ class LafeatEval():
         self.robust = torch.ones(x.size(0), dtype=torch.bool).to(x.device)
         self.logits_first_minus_second_value = torch.ones(x.size(0), dtype=torch.float).to(x.device)
         self.x_adv = x.clone().detach()
-        self.logger=Logger2(log_path)
 
     def _logits(self, x):
         return self.model(x)[-1]
@@ -128,11 +125,6 @@ class LafeatEval():
             self.x_adv[adv_index] = adv.to(self.x_adv.device)
             if not self.verbose:
                 continue
-            self.logger.log(f'{attack.__class__.__name__}, beta: {beta:.3f}, '
-                f'acc: {self._accuracy():.2%}, '
-                f'batch: {b + 1}/{num_batches}, '
-                f'perturbed: {adv.size(0) / x.size(0):.2%} '
-                f'({adv.size(0)}/{x.size(0)}).')
             print(
                 f'{attack.__class__.__name__}, beta: {beta:.3f}, '
                 f'acc: {self._accuracy():.2%}, '

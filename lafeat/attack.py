@@ -5,21 +5,23 @@ Reference:
     https://github.com/fra31/auto-attack/blob/master/autoattack/autopgd_pt.py
 """
 import time
+import math
 
 import numpy as np
 import torch
 from torch import nn
-import math
 
 
 class LafeatAttack():
-    def __init__(self, model, n_iter=100, norm='Linf', eps=None,
-                 loss='ce', eot_iter=1, rho=.75, verbose=False,
-                 device='cuda'):
+    def __init__(
+            self, model, n_iter=100, norm='Linf', eps=None,
+            loss='ce', eot_iter=1, rho=.75,
+            verbose=False, device='cuda', seed=0):
         self.model = model
         self.n_iter = n_iter
         self.eps = eps - 1.9 * 1e-8
         self.norm = norm
+        self.seed = seed
         self.loss = loss
         self.eot_iter = eot_iter
         self.thr_decr = rho
@@ -149,13 +151,14 @@ class LafeatAttack():
             pred = logits.detach().max(1)[1] == y
             acc = torch.min(acc, pred)
 
-            x_best_adv[(pred == 0).nonzero().squeeze()] = x_adv[(pred == 0).nonzero().squeeze()] + 0.
+            pi = (pred == 0).nonzero(as_tuple=False).squeeze()
+            x_best_adv[pi] = x_adv[pi] + 0.
 
         return acc, x_best_adv
 
     def perturb(self, x_in, y_in, scale_17=0):
         self.scale_17 = scale_17
-        self.seed = np.int(scale_17*10)
+        # self.seed = np.int(scale_17*10)
         assert self.norm in ['Linf', 'L2']
         x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(0)
         y = y_in.clone() if len(y_in.shape) == 1 else y_in.clone().unsqueeze(0)
@@ -172,17 +175,19 @@ class LafeatAttack():
         torch.random.manual_seed(self.seed)
         torch.cuda.random.manual_seed(self.seed)
 
-        ind_to_fool = acc.nonzero().squeeze()
-        if len(ind_to_fool.shape) == 0: ind_to_fool = ind_to_fool.unsqueeze(0)
+        ind_to_fool = acc.nonzero(as_tuple=False).squeeze()
+        if len(ind_to_fool.shape) == 0:
+            ind_to_fool = ind_to_fool.unsqueeze(0)
         if ind_to_fool.numel() != 0:
             x_to_fool, y_to_fool = x[ind_to_fool].clone(), y[ind_to_fool].clone()
             acc_curr, adv_curr = self.attack_single_run(x_to_fool, y_to_fool)
-            ind_curr = (acc_curr == 0).nonzero().squeeze()
+            ind_curr = (acc_curr == 0).nonzero(as_tuple=False).squeeze()
             #
             acc[ind_to_fool[ind_curr]] = 0
             adv[ind_to_fool[ind_curr]] = adv_curr[ind_curr].clone()
             if self.verbose:
-                print('restart {} - robust accuracy: {:.2%} - cum. time: {:.1f} s'.format(
-                    counter, acc.float().mean(), time.time() - startt))
+                print(
+                    f'robust accuracy: {acc.float().mean():.2%} - '
+                    f'cum. time: {time.time() - startt:.1f}s')
 
         return acc, adv

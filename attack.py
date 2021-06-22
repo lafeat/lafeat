@@ -32,7 +32,6 @@ def parse_args():
     parser.add_argument('--multi-targeted', action='store_true')
     parser.add_argument('--beta-arange', type=float, nargs=3, default=(0, 1.0, 0.1))
     parser.add_argument('--no-beta-schedule', action='store_true')
-    parser.add_argument('--log_path', type=str, default='./log_file.txt')
     return parser.parse_args()
 
 
@@ -101,7 +100,7 @@ def main(args):
         n_iter=args.num_iterations, norm=args.norm, eps=args.epsilon,
         betas=betas(args), target=args.multi_targeted,
         batch_size=args.batch_size, device=device,
-        verbose=args.verbose, log_path=args.log_path)
+        verbose=args.verbose)
 
     with torch.no_grad():
         images = adversary.eval()
