@@ -23,15 +23,23 @@ with the following bibtex entry:
 ```
 
 ## Introduction
-Because we take reproducibility very seriously,
-along with the submitted paper,
-we include in the supplementary materials
-the source code for running the LAFEAT attack
-on [TRADES](https://github.com/yaodongyu/TRADES).
-Note that for reproducibility,
-the scripts are made to be completely deterministic,
-your runs should *hopefully* produce
-exactly the same results as ours.
+
+We introduce LAFEAT,
+a unified $\ell^\infty$-norm
+white-box attack algorithm
+which harnesses latent features
+in its gradient descent steps.
+Our results show that not only is it
+computationally much more efficient
+for successful attacks,
+but it is also a stronger adversary
+than the current state-of-the-art
+across a wide range of defense mechanisms.
+This suggests that model robustness
+could be contingent on the effective use
+of the defender's hidden components,
+and it should no longer be viewed
+from a holistic perspective.
 
 ## Requirements
 
@@ -39,6 +47,11 @@ exactly the same results as ours.
 * PyTorch (>= 1.2.0)
 
 ## Instructions for reproducing attacks on TRADES
+
+Note that for reproducibility,
+the scripts are made to be completely deterministic,
+your runs should *hopefully* produce
+exactly the same results as ours.
 
 1. Download the original TRADES CIFAR-10
    [`model_cifar_wrn.pt`](https://drive.google.com/file/d/10sHvaXhTNZGz618QmD5gSOAjO3rMzV33/view?usp=sharing)
