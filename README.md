@@ -1,5 +1,27 @@
 # LAFEAT attack
 
+## Paper
+
+This is the official repository
+for our paper 
+"LAFEAT: Piercing Through Adversarial Defenses with Latent Features".
+The paper is available on:
+* [CVPR 2021 Open Access](https://openaccess.thecvf.com/content/CVPR2021/html/Yu_LAFEAT_Piercing_Through_Adversarial_Defenses_With_Latent_Features_CVPR_2021_paper.html)
+* [ArXiv](https://arxiv.org/abs/2104.09284)
+
+Please feel free to cite our paper
+with the following bibtex entry:
+```bibtex
+@InProceedings{Yu_2021_CVPR,
+    author    = {Yu, Yunrui and Gao, Xitong and Xu, Cheng-Zhong},
+    title     = {{LAFEAT}: Piercing Through Adversarial Defenses With Latent Features},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2021},
+    pages     = {5735-5745}
+}
+```
+
 ## Introduction
 Because we take reproducibility very seriously,
 along with the submitted paper,
